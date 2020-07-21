@@ -3,4 +3,5 @@ export interface IProfile {
   lastName: string;
   username: string;
   age: number;
+  email?: string;
 }

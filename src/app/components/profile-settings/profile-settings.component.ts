@@ -1,4 +1,4 @@
-import { IRequestStates } from './../../models/irequeststates';
+import { IRequestState } from '../../models/irequeststate';
 import { IProfile } from './../../models/iprofile';
 import { ProfileService } from './../../services/profile/profile.service';
 import { Component, OnInit } from '@angular/core';
@@ -11,49 +11,78 @@ import { Component, OnInit } from '@angular/core';
 export class ProfileSettingsComponent implements OnInit {
   public title = 'Profile';
   public user: IProfile;
-  public requestStates: IRequestStates = {
-    loading: false,
-    error: false,
-    saving: false,
-  };
-  public errorMessage: string;
+  public userCopy: IProfile;
+  public requestState: IRequestState;
 
   constructor(private profileService: ProfileService) {}
 
-  ngOnInit(): void {
-    this.fetchProfile();
+  initialiseRequestState(): void {
+    this.requestState = {
+      loading: false,
+      saving: false,
+      error: { error: false, message: '' },
+    };
   }
 
-  async fetchProfile(): Promise<void> {
+  async getProfileUser(): Promise<void> {
     try {
-      this.requestStates.loading = true;
+      this.requestState.loading = true;
 
       this.user = await this.profileService.getProfileUser();
+      this.userCopy = { ...this.user };
 
-      this.requestStates.loading = false;
+      this.requestState.loading = false;
     } catch (error) {
       console.error('Failed to fetch user profile, retrying...');
-      this.fetchProfile();
+      this.getProfileUser();
     }
   }
 
-  async saveFirstName(): Promise<void> {
+  ngOnInit(): void {
+    this.initialiseRequestState();
+    this.getProfileUser();
+  }
+
+  resetEmail(): void {
+    this.user.email = null;
+    this.userCopy.email = null;
+  }
+
+  revertUserChange(): void {
+    this.user = { ...this.userCopy };
+  }
+
+  async updateNameAndGenerateEmail(): Promise<void> {
     try {
-      this.requestStates = { error: false, saving: true };
+      this.requestState = {
+        error: { error: false, message: '' },
+        saving: true,
+      };
+      this.resetEmail();
 
-      await this.profileService.setName(this.user.firstName);
+      const userResponse = await this.profileService.setName(
+        this.user.firstName,
+        this.user.lastName
+      );
+      this.requestState.saving = false;
 
-      this.requestStates.saving = false;
+      const { email } = await this.profileService.setUserEmail();
+      this.user.email = email;
+
+      // userCopy will be used to reset the user to previous state in case of an error
+      this.userCopy = { ...userResponse };
     } catch (error) {
-      this.requestStates = { error: true, saving: false };
-      this.errorMessage = `${error.error}`;
+      this.requestState = {
+        error: { error: true, message: `${error.error}` },
+        saving: false,
+      };
+      this.resetEmail();
+      this.revertUserChange();
     }
   }
 
-  onKeyUp(): void {
-    if (this.requestStates.error) {
-      this.requestStates.error = false;
-      this.errorMessage = '';
-    }
+  onInputKeyUp(): void {
+    this.initialiseRequestState();
+    this.resetEmail();
   }
 }

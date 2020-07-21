@@ -3,13 +3,25 @@
     <div>
         <p>Username: {{user?.username}}</p>
     </div>
-    <div>
-        <label>First Name:</label>
-        <input type="text" [(ngModel)]="user && user.firstName"
-            [attr.disabled]="requestStates.loading ? '' : null" (keyup)="onKeyUp()"/>
-        <input type="button" value="Save" (click)="saveFirstName()" />
+    <form #updateNameForm="ngForm" (ngSubmit)="updateNameAndGenerateEmail()">
+        <div>
+            <label>First Name:</label>
+            <input type="text" name="firstName" [(ngModel)]="user && user.firstName"
+                [attr.disabled]="requestState.loading ? '' : null" (keyup)="onInputKeyUp()" />
+        </div>
+        <div>
+            <label>Last Name:</label>
+            <input type="text" name="lastName" [(ngModel)]="user && user.lastName"
+                [attr.disabled]="requestState.loading ? '' : null" (keyup)="onInputKeyUp()" />
+        </div>
+        <button>Save</button>
+    </form>
+
+    <div *ngIf="user?.email">
+        <p>Email: {{user?.email}}</p>
     </div>
-    <p *ngIf="requestStates.loading">Loading profile...</p>
-    <p *ngIf="requestStates.saving">Saving profile...</p>
-    <p *ngIf="requestStates.error">Error! {{errorMessage}}</p>
+
+    <p *ngIf="requestState.loading">Loading profile...</p>
+    <p *ngIf="requestState.saving">Saving profile...</p>
+    <p *ngIf="requestState.error.error">{{requestState.error.message}}</p>
 </div>
