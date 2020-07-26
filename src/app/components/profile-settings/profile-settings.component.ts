@@ -1,3 +1,6 @@
+import { ProfileStateHistory } from '../../../utils/memento/profile-state/profile-state-history';
+import { IProfileState } from './../../models/iprofilestate';
+import { ProfileState } from '../../../utils/memento/profile-state/profile-state';
 import { IRequestState } from '../../models/irequeststate';
 import { IProfile } from './../../models/iprofile';
 import { ProfileService } from './../../services/profile/profile.service';
@@ -14,7 +17,11 @@ export class ProfileSettingsComponent implements OnInit {
   public userCopy: IProfile;
   public requestState: IRequestState;
 
-  constructor(private profileService: ProfileService) {}
+  constructor(
+    private profileService: ProfileService,
+    private profileState: ProfileState,
+    private profileStateHistory: ProfileStateHistory
+  ) {}
 
   initialiseRequestState(): void {
     this.requestState = {
@@ -29,7 +36,7 @@ export class ProfileSettingsComponent implements OnInit {
       this.requestState.loading = true;
 
       this.user = await this.profileService.getProfileUser();
-      this.userCopy = { ...this.user };
+      this.profileStateHistory.push(this.createProfileState());
 
       this.requestState.loading = false;
     } catch (error) {
@@ -45,11 +52,22 @@ export class ProfileSettingsComponent implements OnInit {
 
   resetEmail(): void {
     this.user.email = null;
-    this.userCopy.email = null;
   }
 
   revertUserChange(): void {
     this.user = { ...this.userCopy };
+  }
+
+  createProfileState(): IProfileState {
+    return this.profileState.createProfileState(
+      this.user.firstName,
+      this.user.lastName
+    );
+  }
+
+  restoreProfileState(profileState: IProfileState): void {
+    this.user.firstName = profileState.firstName;
+    this.user.lastName = profileState.lastName;
   }
 
   async updateNameAndGenerateEmail(): Promise<void> {
@@ -60,7 +78,7 @@ export class ProfileSettingsComponent implements OnInit {
       };
       this.resetEmail();
 
-      const userResponse = await this.profileService.setName(
+      await this.profileService.setName(
         this.user.firstName,
         this.user.lastName
       );
@@ -69,15 +87,16 @@ export class ProfileSettingsComponent implements OnInit {
       const { email } = await this.profileService.setUserEmail();
       this.user.email = email;
 
-      // userCopy will be used to reset the user to previous state in case of an error
-      this.userCopy = { ...userResponse };
+      this.profileStateHistory.push(this.createProfileState());
     } catch (error) {
       this.requestState = {
         error: { error: true, message: `${error.error}` },
         saving: false,
       };
       this.resetEmail();
-      this.revertUserChange();
+      // Using peek instead of pop as there can be errors multiple times and popping
+      // profile states on every error will return undefined at some stage
+      this.restoreProfileState(this.profileStateHistory.peek());
     }
   }
 
