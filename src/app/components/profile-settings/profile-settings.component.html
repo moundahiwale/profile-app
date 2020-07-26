@@ -1,27 +1,36 @@
 <div>
-    <h1>{{title}}</h1>
+    <label>
+        {{ 'changeLanguage' | translate }}
+        <select #langSelect (change)="translate.use(langSelect.value)">
+            <option *ngFor="let lang of translate.getLangs()" [value]="lang"
+                [selected]="lang === translate.currentLang">
+                {{ lang }}</option>
+        </select>
+    </label>
+    <h1>{{ 'profile.title' | translate }}</h1>
+
     <div>
-        <p>Username: {{user?.username}}</p>
+        <p>{{'profile.username' | translate }} {{user?.username}}</p>
     </div>
     <form #updateNameForm="ngForm" (ngSubmit)="updateNameAndGenerateEmail()">
         <div>
-            <label>First Name:</label>
+            <label>{{'profile.firstName' | translate }}</label>
             <input type="text" name="firstName" [(ngModel)]="user && user.firstName"
                 [attr.disabled]="requestState.loading ? '' : null" (keyup)="onInputKeyUp()" />
         </div>
         <div>
-            <label>Last Name:</label>
+            <label>{{'profile.lastName' | translate }}</label>
             <input type="text" name="lastName" [(ngModel)]="user && user.lastName"
                 [attr.disabled]="requestState.loading ? '' : null" (keyup)="onInputKeyUp()" />
         </div>
-        <button>Save</button>
+        <button>{{'profile.save' | translate }}</button>
     </form>
 
     <div *ngIf="user?.email">
         <p>Email: {{user?.email}}</p>
     </div>
 
-    <p *ngIf="requestState.loading">Loading profile...</p>
-    <p *ngIf="requestState.saving">Saving profile...</p>
+    <p *ngIf="requestState.loading">{{'profile.loading' | translate }}</p>
+    <p *ngIf="requestState.saving">{{'profile.saving' | translate }}</p>
     <p *ngIf="requestState.error.error">{{requestState.error.message}}</p>
 </div>

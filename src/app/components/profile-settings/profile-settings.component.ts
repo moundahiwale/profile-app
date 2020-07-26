@@ -5,6 +5,8 @@ import { IRequestState } from '../../models/irequeststate';
 import { IProfile } from './../../models/iprofile';
 import { ProfileService } from './../../services/profile/profile.service';
 import { Component, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-profile-settings',
@@ -20,7 +22,8 @@ export class ProfileSettingsComponent implements OnInit {
   constructor(
     private profileService: ProfileService,
     private profileState: ProfileState,
-    private profileStateHistory: ProfileStateHistory
+    private profileStateHistory: ProfileStateHistory,
+    public translate: TranslateService
   ) {}
 
   initialiseRequestState(): void {
@@ -46,6 +49,9 @@ export class ProfileSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.translate.addLangs(environment.availableLanguages);
+    this.translate.setDefaultLang(environment.defaultLanguage);
+
     this.initialiseRequestState();
     this.getProfileUser();
   }

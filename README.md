@@ -11,9 +11,14 @@ Originator: ProfileSettingsComponent
 Memento: ProfileState  
 Caretaker: ProfileStateHistory  
 
+**Internationalization**  
+The app provides an option to change the language on the profile page using ngx-translate.  The available languages are English, German and Portuguese.  
+To add or edit translations, make necessary changes in the respective translation json files available under 'src/assets/i18n'
+
+
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Run `ng serve` (run `npm install` before `ng serve` to install dependencies) for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
 ## Considerations for production applications
 

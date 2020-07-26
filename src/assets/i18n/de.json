@@ -1,0 +1,13 @@
+{
+  "changeLanguage": "Sprache ändern",
+  "profile": {
+    "title": "Profil",
+    "username": "Nutzername:",
+    "firstName": "Vorname:",
+    "lastName": "Nachname:",
+    "email": "Email:",
+    "loading": "Ladeprofil ...",
+    "saving": "Profil speichern ...",
+    "save": "Sparen"
+  }
+}
